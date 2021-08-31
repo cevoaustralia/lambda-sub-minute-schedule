@@ -1,0 +1,58 @@
+service: ${self:custom.serviceName}
+
+plugins:
+  - serverless-iam-roles-per-function
+
+custom:
+  serviceName: lambda-schedule
+  scheduleInterval: 10
+  owner: jaehyeon
+  queue:
+    name: ${self:custom.serviceName}-queue-${self:provider.stage}
+    url: !Ref Queue
+    arn: !GetAtt Queue.Arn
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-1'}
+  lambdaHashingVersion: 20201221
+  memorySize: 128
+  logRetentionInDays: 7
+  deploymentBucket:
+    tags:
+      OWNER: ${self:custom.owner}
+  stackTags:
+    OWNER: ${self:custom.owner}
+
+functions:
+  sender:
+    handler: src/sender.handler
+    name: ${self:custom.serviceName}-sender-${self:provider.stage}
+    events:
+      - schedule:
+          rate: rate(1 minute)
+          enabled: true
+    environment:
+      SCHEDULE_INTERVAL: ${self:custom.scheduleInterval}
+      QUEUE_URL: ${self:custom.queue.url}
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - sqs:SendMessage
+        Resource:
+          - ${self:custom.queue.arn}
+  receiver:
+    handler: src/receiver.handler
+    name: ${self:custom.serviceName}-receiver-${self:provider.stage}
+    events:
+      - sqs:
+          arn: ${self:custom.queue.arn}
+
+resources:
+  Resources:
+    Queue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${self:custom.queue.name}
