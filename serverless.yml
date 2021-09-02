@@ -6,7 +6,6 @@ plugins:
 custom:
   serviceName: lambda-schedule
   scheduleInterval: 10
-  owner: jaehyeon
   queue:
     name: ${self:custom.serviceName}-queue-${self:provider.stage}
     url: !Ref Queue
@@ -22,9 +21,9 @@ provider:
   logRetentionInDays: 7
   deploymentBucket:
     tags:
-      OWNER: ${self:custom.owner}
+      OWNER: ${env:owner}
   stackTags:
-    OWNER: ${self:custom.owner}
+    OWNER: ${env:owner}
 
 functions:
   sender:
@@ -43,9 +42,9 @@ functions:
           - sqs:SendMessage
         Resource:
           - ${self:custom.queue.arn}
-  receiver:
-    handler: src/receiver.handler
-    name: ${self:custom.serviceName}-receiver-${self:provider.stage}
+  consumer:
+    handler: src/consumer.handler
+    name: ${self:custom.serviceName}-consumer-${self:provider.stage}
     events:
       - sqs:
           arn: ${self:custom.queue.arn}
