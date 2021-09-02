@@ -1,9 +1,9 @@
-#%%
+# %%
 import re
 from datetime import datetime
+from IPython.display import display
 import pandas as pd
 import seaborn as sns
-import matplotlib.pyplot as plt
 
 sns.set_theme(style="darkgrid")
 
@@ -28,7 +28,7 @@ def create_df():
 
 
 df = create_df()
-print(df["interval"].describe())
+display(pd.DataFrame(df["interval"].describe()))
 
 sns.lineplot(x="invocation", y="interval", data=df).set_title("Interval by invocation")
 

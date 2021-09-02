@@ -5,11 +5,12 @@ verify_ssl = true
 
 [dev-packages]
 black = "*"
-ipykernel = "*"
 
 [packages]
 pandas = "*"
 seaborn = "*"
+nbconvert = "*"
+tabulate = "*"
 
 [pipenv]
 allow_prereleases = true
