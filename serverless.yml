@@ -1,3 +1,4 @@
+# serverless.yml
 service: ${self:custom.serviceName}
 
 plugins:
@@ -10,6 +11,13 @@ custom:
     name: ${self:custom.serviceName}-queue-${self:provider.stage}
     url: !Ref Queue
     arn: !GetAtt Queue.Arn
+
+package:
+  patterns:
+    - "!*"
+    - "!*/**"
+    - "node_modules/**"
+    - "src/**"
 
 provider:
   name: aws
