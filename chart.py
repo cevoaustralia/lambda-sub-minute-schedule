@@ -5,8 +5,6 @@ from IPython.display import display
 import pandas as pd
 import seaborn as sns
 
-sns.set_theme(style="darkgrid")
-
 
 def parse_ts(s):
     return datetime.strptime(s, "%Y-%m-%dT%H:%M:%S.%fZ")
@@ -23,13 +21,16 @@ def create_df():
     ts = extract_ts()
     df = pd.DataFrame(ts, columns=["timestamp"])
     df["invocation"] = df.index + 1
-    df["interval"] = df.apply(lambda row: row["timestamp"].timestamp(), axis=1)
-    return df.set_index(["timestamp", "invocation"]).diff().reset_index()
+    df["interval"] = df.apply(lambda row: row["timestamp"].timestamp() * 1000, axis=1)
+    df = df.set_index(["timestamp", "invocation"]).diff().reset_index()
+    df["delay"] = df.apply(lambda row: row["interval"] - 10000, axis=1)
+    return df
 
 
 df = create_df()
-display(pd.DataFrame(df["interval"].describe()))
 
-sns.lineplot(x="invocation", y="interval", data=df).set_title("Interval by invocation")
+sns.set_theme(style="darkgrid")
+sns.lineplot(x="invocation", y="delay", data=df).set_title("Delay by invocation")
 
 # %%
+display(pd.DataFrame(df[df.invocation >= 200]["delay"].describe()))
