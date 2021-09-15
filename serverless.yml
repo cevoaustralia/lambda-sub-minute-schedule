@@ -38,8 +38,8 @@ functions:
     handler: src/sender.handler
     name: ${self:custom.serviceName}-sender-${self:provider.stage}
     events:
-      - schedule:
-          rate: rate(1 minute)
+      - eventBridge:
+          schedule: rate(1 minute)
           enabled: true
     environment:
       SCHEDULE_INTERVAL: ${self:custom.scheduleInterval}
